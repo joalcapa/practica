@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <canvas id="myCanvas" width="100" height="100" style="background-color: yellow;"></canvas>
+    <canvas id="myCanvas" width="500" height="500" style="background-color: yellow;"></canvas>
     <script>
         window.addEventListener('load', function() {
 
@@ -29,8 +29,8 @@
                 const _width = 100;
                 const _height = 100;
                 let _counter = 800;
-                let _posX = 0;
-                let _posY = 0;
+                let _posX = 460;
+                let _posY = 440;
 
                 const act = function () {
                     _counter = _counter - 100;
@@ -54,9 +54,56 @@
                     );
                 };
 
+                const caminarIzquierda = function() {
+                    _posX = _posX - 10;
+                }
+
+                const caminarDerecha = function() {
+                    _posX = _posX + 10;
+                }
+
                 return {
                     act: act,
                     draw: draw,
+                    caminarIzquierda: caminarIzquierda,
+                    caminarDerecha: caminarDerecha,
+                }
+            };
+
+            const createStage = function() {
+                const _fps = 110;
+                const _canvas = document.getElementById("myCanvas");
+                const _context = _canvas.getContext("2d");
+                const _actors = [];
+
+                const addActor = function(actor) {
+                    _actors.push(actor);
+                };
+
+                const act = function () {
+                    for (let i=0; i<_actors.length; i++) {
+                        _actors[i].act();
+                    }
+                }
+
+                const draw = function () {
+                    _context.clearRect(0, 0, _canvas.width, _canvas.height);
+
+                    for (let i=0; i<_actors.length; i++) {
+                        _actors[i].draw(_context);
+                    }
+                }
+
+                const run = function () {
+                    setInterval(function() {
+                        act();
+                        draw();
+                    }, _fps);
+                };
+
+                return {
+                    addActor: addActor,
+                    run: run,
                 }
             };
 
@@ -64,8 +111,21 @@
                 try {
 
                     const image = await loadImage("a.png");
-                    // aqui ya tenemos la imagen
                     const mario = createMario(image);
+                    const stage = createStage();
+
+                    stage.addActor(mario);
+                    stage.run();
+
+                    document.addEventListener('keydown', function(event) {
+                        if (event.keyCode == 37) {
+                            mario.caminarIzquierda();
+                        }
+
+                        if (event.keyCode == 39) {
+                            mario.caminarDerecha();
+                        }
+                    });
 
                 } catch (error) {
                     console.log(error);
